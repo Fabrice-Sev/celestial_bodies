@@ -1,0 +1,47 @@
+{% extends 'index.html' %}
+
+{% load static %}
+
+{% load custom_tags %}
+
+{% block content %}
+ <h1>Name: {{asteroid.name}}</h1>
+ <h2>Designation : {{asteroid.designation}}</h2>
+ <h3>Estimated Diameter in Kilometers : {{asteroid.estimated_diameter.kilometers.estimated_diameter_min|floatformat:"2"}} - {{asteroid.estimated_diameter.kilometers.estimated_diameter_max|floatformat:"2"}} </h3>
+ <h3>Estimated Diameter in Meters : {{asteroid.estimated_diameter.meters.estimated_diameter_min|floatformat:"2"}} - {{asteroid.estimated_diameter.meters.estimated_diameter_max|floatformat:"2"}} </h3>
+ <h3>Estimated Diameter in Miles : {{asteroid.estimated_diameter.miles.estimated_diameter_min|floatformat:"2"}} - {{asteroid.estimated_diameter.miles.estimated_diameter_max|floatformat:"2"}} </h3>
+ <h3>Estimated Diameter in Feet : {{asteroid.estimated_diameter.feet.estimated_diameter_min|floatformat:"2"}} - {{asteroid.estimated_diameter.feet.estimated_diameter_max|floatformat:"2"}} </h3>
+ 
+ <br>
+ <h3>5 Last Approaches to earth</h3>
+ <br>
+ <br>
+ <table class="table table-hover table-striped table-bordered border-dark">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th> Full Date and Time</th>
+            <th> Miss Distance in Kilometers </th>
+            <th> Miss Distance in Miles </th>
+            <th> Miss Distance in Lunatic </th>
+            <th> Miss Distance in Asteroid </th>
+            <th> Relative Velocity in KM/H </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in last_5_dates %}
+            <tr>
+                <td>{{data.close_approach_date}}</td>
+                <td>{{data.close_approach_date_full}}</td>
+                <td>{{data.miss_distance_in_km|floatformat:"2"}}</td>
+                <td>{{data.miss_distance_in_mi|floatformat:"2"}}</td>
+                <td>{{data.miss_distance_in_astro|floatformat:"2"}}</td>
+                <td>{{data.miss_distance_in_luna|floatformat:"2"}}</td>
+                <td>{{data.relative_velocity_in_km_per_hour|floatformat:"2"}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+ </table>
+ <br>
+<a href="{% url 'asteroids_with_dates' %}" class="btn btn-info"> Go back to Asteroid List</a>
+{% endblock %}

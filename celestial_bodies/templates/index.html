@@ -1,0 +1,110 @@
+{% load static %}
+
+{% load custom_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroids</title>
+
+    
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
+</head>
+<body>
+    {% block content %}
+    <br>
+    <form action="{% url 'asteroids_with_dates' %}" method="post" onsubmit = "verify_dates(event)">
+        {% csrf_token %}
+        <label for="start-date" style="width: 25% !important;" class="form-label">Start Date</label>
+        <input type="date" style="width: 25% !important;" class="form-control" name="start_date" id="start_date" required="required">
+        <br>
+        <label for="end-date" style="width: 25% !important;" class="form-label"> End Date</label>        
+        <input type="date" style="width: 25% !important;" class="form-control" name="end_date" id="end_date" required="required">
+        <br>
+        <input type="submit" class="btn btn-primary" value="Search">
+    </form>
+    <br>
+    <br>
+    <br>
+    {% if asteroid_list %}
+        <table class="table table-hover table-striped table-bordered border-dark">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Estimated Diameter (kilometers)</th>
+                    <th>Estimated Diameter (miles)</th>
+                    <th>Miss Distance (kilometers)</th>
+                    <th>Miss Distance (miles)</th>
+                    <th>Next approach</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asteroid in asteroid_list %}
+                    <tr>
+                        <td> <a href="{% url 'asteroid_details' asteroid.id %}" class="link-info">{{asteroid.name}}</a></td>
+                        <td>{{asteroid.estimated_diameter.kilometers.estimated_diameter_min|floatformat:"2"}} - {{asteroid.estimated_diameter.kilometers.estimated_diameter_max|floatformat:"2"}}</td>
+                        <td>{{asteroid.estimated_diameter.miles.estimated_diameter_min|floatformat:"2"}} - {{asteroid.estimated_diameter.miles.estimated_diameter_max|floatformat:"2"}}</td>
+                        <td>{% get_close_approach_data_in_km asteroid.close_approach_data %}</td>
+                        <td>{% get_close_approach_data_in_mi asteroid.close_approach_data %}</td>
+                        <td>{% get_next_approach_date asteroid.links.self %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+    <h2>Please, select a date to see Asteroids close to earth within that time frame</h2>
+    <div id="liveAlertPlaceholder"></div>
+    {% endif %}
+
+    {% endblock %}
+
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script>
+
+        const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
+
+        const alert = (message, type) => {
+        const wrapper = document.createElement('div')
+        wrapper.innerHTML = [
+            `<div class="alert alert-${type} alert-dismissible" role="alert" style='width:25%'>`,
+            `   <div>${message}</div>`,
+            '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+            '</div>'
+        ].join('')
+
+        alertPlaceholder.append(wrapper)
+        }
+
+        const alertTrigger = document.getElementById('liveAlertBtn')
+        if (alertTrigger) {
+        alertTrigger.addEventListener('click', () => {
+            alert('Nice, you triggered this alert message!', 'success')
+        })
+        }
+
+        function verify_dates(event){
+            var start_date_elt = document.getElementById('start_date')
+            var end_date_elt = document.getElementById('end_date')
+            var start_date = new Date(String(start_date_elt.value).split('-')[0], String(start_date_elt.value).split('-')[1]-1, String(start_date_elt.value).split('-')[2])
+            var end_date = new Date(String(end_date_elt.value).split('-')[0], String(end_date_elt.value).split('-')[1]-1, String(end_date_elt.value).split('-')[2])
+            var difference = end_date.getTime() - start_date.getTime();
+            var TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
+            if (end_date <= start_date){
+                event.preventDefault()
+                alert('End Date must be after Start Date!', 'danger')
+            }
+            if (TotalDays > 7){
+                event.preventDefault()
+                alert('Time interval must bet within 7 days', 'danger')
+            }
+        }
+        
+
+    </script>
+
+    
+</body>
+</html>
